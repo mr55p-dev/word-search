@@ -17,7 +17,7 @@ class Grid():
     size: int
 
     def __init__(self, size: int) -> None:
-        self.storage = np.chararray((size, size))
+        self.storage = np.zeros((size, size), dtype=bytes)
         self.storage.fill(EMPTY_CELL_CHAR)
         self.size = size
         self.horizMask = np.zeros((size, size), dtype=np.int8)
@@ -28,10 +28,7 @@ class Grid():
         return "\n".join(" ".join(i.decode("utf-8") for i in j) for j in self.storage)
 
     def randomize_empty_cells(self):
-            for i in range(self.size):
-                for j in range(self.size):
-                    if  self.storage[i, j] == EMPTY_CELL_CHAR:
-                        self.storage[i, j] = chr(np.random.randint(65, 65+26)).encode()
+        self.storage = np.vectorize(is_empty)(self.storage)
 
     def valid_coords(self, coord: T_coord) -> bool:
         i, j = coord
@@ -87,6 +84,11 @@ def hits_mask(coords: T_coord, mask: np.ndarray) -> bool:
 def iter_coords(origin: T_coord, end: int, axis: int):
     for i in range(end):
         yield calc_coord(origin, i, axis)
+
+def is_empty(ch: bytes) -> bytes:
+    if ch != EMPTY_CELL_CHAR:
+        return ch
+    return chr(np.random.randint(65, 65+26)).encode()
 
 def calc_coord(origin: T_coord, offset: int, axis: int) -> T_coord:
     if axis == 0:
