@@ -1,16 +1,16 @@
+import sys
 from backend.main import Grid
-from backend.utils import loadAllWordSample, readFileLines, transform
-import random
+from backend.utils import getLines, loadAllWordSample, transform
 
 
 TOTAL_WORDS_IN_SEARCH = 20
 ALL_WORDS_MAX_LEN = 7
 RETRY_WORD_PLACEMENT_CNT = 1
-DIFFICULTY = 0.1
 
 def main():
     # load user word list
-    words = readFileLines("./words.txt")
+    data = sys.stdin.read()
+    words = getLines(data)
     words_cnt = len(words)
     words_max = max(len(i) for i in words)
 
@@ -22,7 +22,7 @@ def main():
     for word in words:
         worked = False
         for _ in range(RETRY_WORD_PLACEMENT_CNT):
-            worked = search.put(*transform(word, DIFFICULTY))
+            worked = search.put(*transform(word, "easy"))
             if worked:
                 break
         if not worked:
