@@ -1,0 +1,72 @@
+<!DOCTYPE >
+<html>
+  <head>
+    <title>Wordsearch</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://unpkg.com/missing.css@1.1.1"
+    />
+  </head>
+  <body>
+    <header class="nav">
+      <h1>Wordsearch</h1>
+    </header>
+    <main>
+      <section>
+        <div class="box">
+          <form
+            class="table rows"
+            action="/wordsearch"
+            ,
+            method="post"
+            hx-post="/wordsearch"
+            hx-target="#search"
+            hx-swap="innerHTML"
+          >
+            <legend>Create a wordsearch</legend>
+            <p>
+              <label for="words">Words</label
+              ><textarea rows="3" cols="30" name="words"></textarea>
+            </p>
+            <p>
+              <label for="difficulty">Select difficulty</label>
+              <select name="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </p>
+            <button type="submit">Submit</button>
+          </form>
+        </div>
+      </section>
+      <section id="search"></section>
+      <section>
+        <h3>About</h3>
+        <ol>
+          <details>
+            <summary>Easy</summary>
+            <p>
+              Words will only appear horizontally or vertically, with no
+              reversing the word order.
+            </p>
+          </details>
+          <details>
+            <summary>Medium</summary>
+            <p>Same as easy, but with words on diagonals</p>
+          </details>
+          <details>
+            <summary>Hard</summary>
+            <p>Same as medium, but with some words reversed</p>
+          </details>
+        </ol>
+      </section>
+    </main>
+  </body>
+  <script
+    src="https://unpkg.com/htmx.org@1.9.10"
+    integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+    crossorigin="anonymous"
+  ></script>
+</html>

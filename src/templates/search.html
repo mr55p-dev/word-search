@@ -1,0 +1,35 @@
+<div
+  class="box"
+  style="
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+  "
+>
+  <div
+    style="
+		display: grid;
+		grid-template-columns: repeat({{size}}, 2rem);
+		grid-template-rows: repeat({{size}}, 2rem);
+		gap: 0;
+	"
+  >
+    {% for row in range(size) %} {% for col in range(size) %}
+    <div
+      class="center"
+      style="text-align: center; font-size: 24px; line-height: 1; padding: 10px"
+    >
+      {{ grid[row * size + col] }}
+    </div>
+    {% endfor %} {% endfor %}
+  </div>
+  <div class="box info">
+    <strong class="block titlebar">Find these words</strong>
+    <div style="display: flex; gap: 1.25rem">
+      {% for word in words %}
+      <p>{{ word }}</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>

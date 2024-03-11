@@ -1,19 +1,15 @@
 import numpy as np
 import random
+from .types import T_coord
 
 EMPTY_CELL_CHAR = b"."
-TOTAL_WORDS_IN_SEARCH = 20
-ALL_WORDS_MAX_LEN = 7
-RETRY_WORD_PLACEMENT_CNT = 1
-DIFFICULTY = 0.1
-
-T_coord = tuple[int, int]
 
 class Grid():
     storage: np.ndarray
     horizMask: np.ndarray
     vertMask: np.ndarray
     diagMask: np.ndarray
+    diagInvMask: np.ndarray
     size: int
 
     def __init__(self, size: int) -> None:
@@ -23,9 +19,13 @@ class Grid():
         self.horizMask = np.zeros((size, size), dtype=np.int8)
         self.vertMask = np.zeros((size, size), dtype=np.int8)
         self.diagMask = np.zeros((size, size), dtype=np.int8)
+        self.diagInvMask = np.zeros((size, size), dtype=np.int8)
     
     def __repr__(self) -> str:
         return "\n".join(" ".join(i.decode("utf-8") for i in j) for j in self.storage)
+
+    def to_list(self) -> list[list[str]]:
+        return [j.decode("utf-8") for i in self.storage.tolist() for j in i]
 
     def randomize_empty_cells(self):
         self.storage = np.vectorize(is_empty)(self.storage)
@@ -49,11 +49,13 @@ class Grid():
             return self.vertMask
         elif axis == 2:
             return self.diagMask
+        elif axis == 3:
+            return self.diagInvMask
         raise ValueError(f"Invalid axis {axis}")
 
     def put(self, word: str, axis: int) -> bool:
         primary_mask = self.get_mask(axis)
-        word = word.upper().replace(" ", "")
+        word = word.upper().replace(" ", "").replace("\n", "").replace("\r", "")
 
         valid_starts: list[T_coord] = []
         for i in range(self.size):
@@ -95,55 +97,10 @@ def calc_coord(origin: T_coord, offset: int, axis: int) -> T_coord:
         return (origin[0], origin[1] + offset)
     elif axis == 1:
         return (origin[0] + offset, origin[1])
-    else:
+    elif axis == 2:
         return (origin[0] + offset, origin[1] + offset)
+    elif axis == 3:
+        return (origin[0] + offset, origin[1] - offset)
+    else:
+        raise ValueError(f"Invalid axis {axis}")
     
-def readFileLines(fname: str) -> list[str]:
-    with open(fname, "r") as f:
-        data = f.read()
-    return [i.upper() for i in data.split("\n") if len(i) > 0]
-
-def transform(word: str, difficulty: float) -> tuple[str, int]:
-    if difficulty < 0.2:
-        return word, random.randint(0, 1)
-    elif difficulty < 0.6:
-        return word, random.randint(0, 2)
-    if random.getrandbits(1) == 1:
-        word = word[::-1]
-    return word, random.randint(0, 2)
-
-def main():
-    # load user word list
-    words = readFileLines("./words.txt")
-    words_cnt = len(words)
-    words_max = max(len(i) for i in words)
-
-    # load global word list
-    all_words = readFileLines("./all-words.txt")
-    all_words = [i for i in all_words if len(i) <= ALL_WORDS_MAX_LEN]
-    sample = random.sample(all_words, TOTAL_WORDS_IN_SEARCH - words_cnt)
-
-    # write user words into search
-    grid_size = int(words_max + 3)
-    search = Grid(grid_size)
-    for word in words:
-        worked = False
-        for _ in range(RETRY_WORD_PLACEMENT_CNT):
-            worked = search.put(*transform(word, DIFFICULTY))
-            if worked:
-                break
-        if not worked:
-            print(search)
-            raise ValueError(f"Failed to put word {word }")
-
-    # write global words into search
-    for word in sample:
-        search.put(word, 0)
-
-    # ensure there are no empty cells
-    search.randomize_empty_cells()
-    print(search)
-    print("Find: " + ", ".join(words))
-
-if __name__ == "__main__":
-    main()
